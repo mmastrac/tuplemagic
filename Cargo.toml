@@ -1,0 +1,11 @@
+[package]
+name = "tuplemagic"
+version = "0.1.0"
+authors = ["Matt Mastracci <matthew@mastracci.com>"]
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/mmastrac/tuplemagic"
+description = "Utilities for manipulating tuples through various operations like mapping, filtering, nesting, and reducing"
+
+[dependencies]
+static_assertions = "0"
