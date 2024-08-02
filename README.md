@@ -27,7 +27,8 @@ operations).
 let a = (1, 2, 3).nest();
 ```
 
-- **Mapping:** Apply transformations to each element of a tuple based on a predicate.
+- **Mapping:** Apply transformations to each element of a tuple based on a type
+  mapper.
 
 ```rust
 # use tuplemagic::*;
@@ -64,13 +65,20 @@ let out = TupleReducerSum::reduce((1_u8, 2_u16, 3_u32), 0);
 
 ## Operations
 
-| Operation          | Value Level | Type Level |
-|--------------------|-------------|------------|
-| Nesting            | Yes         | Yes        |
-| Unnesting          | Yes         | Yes        |
-| Mapping            | Yes         | No         |
-| Filtering          | Yes         | Yes        |
-| Reducing           | Yes         | No         |
+Features of this crate may be available as macros, traits or both based on
+ergonomic concerns. The goal of the crate will be to eventually move to a pure
+trait-based system, but this does not appear possible at this time.
+
+The underlying mechanisms of the macros are subject to change and are not
+considered stable at this time.
+
+| Operation          | Value Level | Type Level | APIs |
+|--------------------|-------------|------------|------|
+| Nesting            | Yes         | Yes        | [`TupleNest`](https://docs.rs/tuplemagic/latest/tuplemagic/trait.TupleNest.html), [`TupleUnnest`](https://docs.rs/tuplemagic/latest/tuplemagic/trait.TupleUnnest.html) [`nest!`](https://docs.rs/tuplemagic/latest/tuplemagic/macro.nest.html) |
+| Unnesting          | Yes         | Yes        | see above |
+| Mapping            |             | Yes        | [`tuple_mapper!`](https://docs.rs/tuplemagic/latest/tuplemagic/macro.tuple_mapper.html) [`TypeMap`](https://docs.rs/tuplemagic/latest/tuplemagic/trait.TypeMap.html) |
+| Filtering          | Yes         | Yes        | [`tuple_filter!`](https://docs.rs/tuplemagic/latest/tuplemagic/macro.tuple_filter.html) [`tuple_filter_predicate!`](https://docs.rs/tuplemagic/latest/tuplemagic/macro.tuple_filter_predicate.html) |
+| Reducing           | Yes         |            | [`TupleReducer`](https://docs.rs/tuplemagic/latest/tuplemagic/trait.TupleReducer.html), [`TupleReducerCapable`](https://docs.rs/tuplemagic/latest/tuplemagic/trait.TupleReducerCapable.html) |
 
 ## Installation
 
