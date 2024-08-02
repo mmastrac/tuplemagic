@@ -5,11 +5,13 @@ mod map;
 mod nest;
 mod reduce;
 
-pub use filter::{
-    TupleFilter, TupleFilterExclude, TupleFilterInclude, TupleFiltered, TupleFilteredValue,
-    TupleFilterer,
-};
-pub use map::TupleMapper;
+#[doc(hidden)]
+pub mod __macro_support {
+    pub use crate::filter::{TupleFilter, TupleFiltered, TupleFilteredValue, TupleFilterer};
+    pub use crate::map::TupleMapper;
+}
+
+pub use filter::{TupleFilterExclude, TupleFilterInclude};
 pub use nest::{TupleNest, TupleUnnest, EOT};
 pub use reduce::{TupleReducer, TupleReducerCapable};
 
@@ -67,7 +69,7 @@ pub mod tests {
     fn filter_type() {
         // This tuple includes a large number of types
         type T = (u8, u8, u16, u32, u16, u8, Option<()>, Vec<u8>);
-        tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ T Option<T>)});
+        tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
         type U = tuple_filter!(P::filter_type(T));
         let _: (u8, u8, u8, Vec<u8>) = U::default();
     }
@@ -77,7 +79,7 @@ pub mod tests {
         // This tuple includes a large number of types
         type T = (u8, u8, u16, u32, u16, u8, Option<()>, Vec<u8>);
         let x: T = (0, 1, 2, 3, 4, 5, None, vec![]);
-        tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ T Option<T>)});
+        tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
         let y = tuple_filter!(P::filter(x));
         assert_eq!(y, (0, 1, 5, vec![]));
         let y = tuple_filter!(P::filter((1_u8, 2_u8, 3_u16)));
@@ -128,7 +130,7 @@ pub mod tests {
             type Mapped = T;
         }
 
-        tuple_mapper!(U = T:map(RemoveOption));
+        type U = tuple_mapper!(RemoveOption::map(T));
 
         let _: (u8, u16, ()) = U::default();
     }

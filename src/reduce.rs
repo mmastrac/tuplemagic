@@ -52,10 +52,10 @@ pub trait TupleReducer<I, F> {
 macro_rules! tuple_reduce {
     () => {};
     ($first:ident, $($tail:ident,)*) => {
-        impl <REDUCER, TARGET, $first,$($tail),*> $crate::reduce::TupleReducerCapable<TARGET, ($first,$($tail,)*)> for REDUCER where
-            REDUCER: TupleReducer<TARGET, $first>,
+        impl <REDUCER, TARGET, $first,$($tail),*> $crate::TupleReducerCapable<TARGET, ($first,$($tail,)*)> for REDUCER where
+            REDUCER: $crate::TupleReducer<TARGET, $first>,
             $(
-                REDUCER: TupleReducer<TARGET, $tail>,
+                REDUCER: $crate::TupleReducer<TARGET, $tail>,
             )* {
                 fn reduce(tuple: ($first,$($tail,)*), input: TARGET) -> TARGET {
                     let this = tuple.nest();

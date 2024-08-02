@@ -118,18 +118,27 @@ where
 /// the given types. All types that may be potentially encountered in the
 /// provided tuples must be specified.
 ///
-/// For types that are generic, use the syntax `~ T Option<T>`.
+/// For types that are generic, use the syntax `~ <T> Option<T>`.
+///
+/// ```
+/// # use tuplemagic::tuple_filter_predicate;
+/// # use std::collections::HashMap;
+/// tuple_filter_predicate!(P = { include = (~ <T> Vec<T>), exclude = (~ <T, U> HashMap<T, U>) });
+/// ```
 #[macro_export]
 macro_rules! tuple_filter_predicate {
-    ($predicate:ident = { include = ($($(~ $include_generics:ident)? $include:ty),*), exclude = ($($(~ $exclude_generics:ident)? $exclude:ty),*) }) => {
+    ($predicate:ident = {
+        include = ($($(~ <$($include_generics:tt),+>)? $include:ty),*),
+        exclude = ($($(~ <$($exclude_generics:tt),+>)? $exclude:ty),*)
+    }) => {
         struct $predicate {}
         $(
-            impl $(<$include_generics>)? $crate::TypeMap<$predicate> for $include {
+            impl $(<$($include_generics),*>)? $crate::TypeMap<$predicate> for $include {
                 type Mapped = $crate::TupleFilterInclude;
             }
         )*
         $(
-            impl $(<$exclude_generics>)? $crate::TypeMap<$predicate> for $exclude {
+            impl $(<$($exclude_generics),*>)? $crate::TypeMap<$predicate> for $exclude {
                 type Mapped = $crate::TupleFilterExclude;
             }
         )*
@@ -143,9 +152,9 @@ macro_rules! tuple_filter_predicate {
 /// (using `filter`).
 ///
 /// ```
-/// # use tuplemagic::*;
+/// # use tuplemagic::{tuple_filter_predicate, tuple_filter};
 /// type T = (u8, u16);
-/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ T Option<T>)});
+/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
 /// type U = tuple_filter!(P::filter_type(T));
 /// let _: (u8,) = U::default();
 /// ```
@@ -154,7 +163,7 @@ macro_rules! tuple_filter_predicate {
 /// # use tuplemagic::{tuple_filter_predicate, tuple_filter};
 /// type T = (u8, u8, u16, u32, u16, u8, Option<()>, Vec<u8>);
 /// let x: T = (0, 1, 2, 3, 4, 5, None, vec![]);
-/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ T Option<T>)});
+/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
 /// let y = tuple_filter!(P::filter(x));
 /// assert_eq!(y, (0, 1, 5, vec![]));
 /// let y = tuple_filter!(P::filter((1_u8, 2_u8, 3_u16)));
@@ -164,15 +173,15 @@ macro_rules! tuple_filter_predicate {
 #[macro_export]
 macro_rules! tuple_filter {
     ($predicate:ident::filter_type($ty:ty)) => {
-        <<TypePair<
-            <$ty as TupleNest>::Nested,
-            <<$ty as TupleNest>::Nested as TypeMap<$predicate>>::Mapped,
-        > as $crate::TupleFiltered>::Output as TupleUnnest>::Unnested
+        <<$crate::TypePair<
+            <$ty as $crate::TupleNest>::Nested,
+            <<$ty as $crate::TupleNest>::Nested as $crate::TypeMap<$predicate>>::Mapped,
+        > as $crate::__macro_support::TupleFiltered>::Output as $crate::TupleUnnest>::Unnested
     };
     ($predicate:ident::filter($tuple:expr)) => {{
-        use $crate::TupleFilterer;
+        use $crate::__macro_support::TupleFilterer;
         let tuple = $tuple;
-        $crate::TupleFilter::<_, P>::of_ref(&tuple).do_filter(tuple)
+        $crate::__macro_support::TupleFilter::<_, P>::of_ref(&tuple).do_filter(tuple)
     }};
 }
 

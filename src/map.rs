@@ -27,12 +27,12 @@ where
 ///     type Mapped = T;
 /// }
 ///
-/// tuple_mapper!(U = T:map(RemoveOption));
+/// type U = tuple_mapper!(RemoveOption::map(T));
 /// let _: (u8, u16, ()) = U::default();
 /// ```
 #[macro_export]
 macro_rules! tuple_mapper {
-    ($name:ident = $ty:ty:map($predicate:ident)) => {
-        type $name = <($ty, $predicate) as $crate::TupleMapper>::Output;
+    ($predicate:ident::map($ty:ty)) => {
+        <($ty, $predicate) as $crate::__macro_support::TupleMapper>::Output
     };
 }
