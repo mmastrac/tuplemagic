@@ -153,12 +153,13 @@ macro_rules! tuple_filter_predicate {
 ///
 /// ```
 /// # use tuplemagic::{tuple_filter_predicate, tuple_filter};
-/// type T = (u8, u16);
 /// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
 ///
 /// // You can filter a type definition
+/// type T = (u8, u16);
 /// type U = tuple_filter!(P::filter_type(T));
 /// static_assertions::assert_eq_type!(U, (u8,));
+///
 /// // The type can also be inline
 /// type V = tuple_filter!(P::filter_type((u8, u16)));
 /// static_assertions::assert_eq_type!(V, (u8,));
