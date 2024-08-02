@@ -78,5 +78,5 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tuplemagic = "0.1.0"
+tuplemagic = "0.x.y"
 ```

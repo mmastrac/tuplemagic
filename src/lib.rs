@@ -71,7 +71,7 @@ pub mod tests {
         type T = (u8, u8, u16, u32, u16, u8, Option<()>, Vec<u8>);
         tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
         type U = tuple_filter!(P::filter_type(T));
-        let _: (u8, u8, u8, Vec<u8>) = U::default();
+        static_assertions::assert_eq_type!((u8, u8, u8, Vec<u8>), U);
     }
 
     #[test]
@@ -131,7 +131,6 @@ pub mod tests {
         }
 
         type U = tuple_mapper!(RemoveOption::map(T));
-
-        let _: (u8, u16, ()) = U::default();
+        static_assertions::assert_eq_type!((u8, u16, ()), U);
     }
 }

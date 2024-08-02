@@ -155,17 +155,28 @@ macro_rules! tuple_filter_predicate {
 /// # use tuplemagic::{tuple_filter_predicate, tuple_filter};
 /// type T = (u8, u16);
 /// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
+///
+/// // You can filter a type definition
 /// type U = tuple_filter!(P::filter_type(T));
-/// let _: (u8,) = U::default();
+/// static_assertions::assert_eq_type!(U, (u8,));
+/// // The type can also be inline
+/// type V = tuple_filter!(P::filter_type((u8, u16)));
+/// static_assertions::assert_eq_type!(V, (u8,));
 /// ```
 ///
 /// ```
 /// # use tuplemagic::{tuple_filter_predicate, tuple_filter};
+/// // A predicate for use below
+/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
+///
+/// // This type isn't necessary but makes this example a little less noisy
 /// type T = (u8, u8, u16, u32, u16, u8, Option<()>, Vec<u8>);
 /// let x: T = (0, 1, 2, 3, 4, 5, None, vec![]);
-/// tuple_filter_predicate!(P = { include = (u8, Vec<u8>), exclude = (u16, u32, ~ <T> Option<T>)});
 /// let y = tuple_filter!(P::filter(x));
 /// assert_eq!(y, (0, 1, 5, vec![]));
+///
+/// // You can filter an inline tuple as well, assuming all types
+/// // can be determined from that tuple.
 /// let y = tuple_filter!(P::filter((1_u8, 2_u8, 3_u16)));
 /// assert_eq!(y, (1, 2));
 /// ```
