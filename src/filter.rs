@@ -120,25 +120,41 @@ where
 ///
 /// For types that are generic, use the syntax `~ <T> Option<T>`.
 ///
+/// ## Limitations
+///
+/// Most trait bounds should be supported, but additional `+` bounds for
+/// generics are not at this time.
+///
 /// ```
 /// # use tuplemagic::tuple_filter_predicate;
 /// # use std::collections::HashMap;
-/// tuple_filter_predicate!(P = { include = (~ <T> Vec<T>), exclude = (~ <T, U> HashMap<T, U>) });
+/// // Private predicate
+/// tuple_filter_predicate!(P1 = { include = (u8), exclude = (u16, u32) });
+/// // Mark a predicate as public with `pub` (or `pub(crate)`, etc.)
+/// tuple_filter_predicate!(pub P2 = { include = (u8), exclude = (u16, u32) });
+/// // Generics are supported
+/// tuple_filter_predicate!(P3 = { include = (~ <T> Vec<T>), exclude = (~ <T, U> HashMap<T, U>) });
+/// // Including constants
+/// tuple_filter_predicate!(P4 = { include = (~ <const S: usize> [u8; S]), exclude = (~ <const S: usize> [u16; S]) });
+/// // And lifetimes...
+/// tuple_filter_predicate!(P5 = { include = (~ <'a> &'a str), exclude = (&'static [u8]) });
+/// /// And why not all of the above?
+/// tuple_filter_predicate!(P6 = { include = (~ <'a, T: Into<usize>, const S: usize> &'a [T; S]), exclude = () });
 /// ```
 #[macro_export]
 macro_rules! tuple_filter_predicate {
-    ($predicate:ident = {
-        include = ($($(~ <$($include_generics:tt),+>)? $include:ty),*),
-        exclude = ($($(~ <$($exclude_generics:tt),+>)? $exclude:ty),*)
+    ($vis:vis $predicate:ident = {
+        include = ($($(~ <$($ilt:lifetime),* $(,)? $($igen:ident $($igen2:ident)? $(: $($ibound:path)+)?),*>)? $include:ty),*),
+        exclude = ($($(~ <$($elt:lifetime),* $(,)? $($egen:ident $($egen2:ident)? $(: $($ebound:path)+)?),*>)? $exclude:ty),*)
     }) => {
-        struct $predicate {}
+        $vis struct $predicate {}
         $(
-            impl $(<$($include_generics),*>)? $crate::TypeMap<$predicate> for $include {
+            impl $(<$($ilt,)* $($igen $($igen2)? $(: $($ibound)+)?,)*>)? $crate::TypeMap<$predicate> for $include {
                 type Mapped = $crate::TupleFilterInclude;
             }
         )*
         $(
-            impl $(<$($exclude_generics),*>)? $crate::TypeMap<$predicate> for $exclude {
+            impl $(<$($elt,)*  $($egen $($egen2)? $(: $($ebound)+)?,)*>)? $crate::TypeMap<$predicate> for $exclude {
                 type Mapped = $crate::TupleFilterExclude;
             }
         )*
